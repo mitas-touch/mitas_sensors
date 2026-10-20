@@ -1,0 +1,115 @@
+# =============================================================================
+#  mitas_sensors — sensor configuration
+#  Edit this file to adjust parameters. Re-launch to apply changes.
+#
+#  Keys use /**/node_name so parameters match under any namespace
+#  (e.g. /mitas_sensors/gelsight_mini_node). Bare node names only match
+#  the root namespace and silently fall back to code defaults.
+# =============================================================================
+
+# ── GelSight Mini ─────────────────────────────────────────────────────────────
+/**/gelsight_mini_node:
+  ros__parameters:
+
+    gelsight:
+      # Resolution at which the camera is captured (width x height, pixels).
+      # 895x672 keeps the sensor aspect ratio.
+      capture_width:  895
+      capture_height: 672
+
+      # Resolution of the published image after crop + resize.
+      output_width:  320
+      output_height: 240
+
+      # Publishing frequency (Hz).
+      publish_rate_hz: 25.0
+
+      # Fraction of the image border to crop on each side (1/7 ≈ 0.143).
+      border_crop_fraction: 0.143
+
+      # ROS 2 topic (relative — published under the /mitas_sensors namespace).
+      topic: "gelsight_mini/image"
+
+      # TF frame id stamped on each message.
+      frame_id: "gelsight_mini"
+
+      # V4L device name substring. "GelSight" selects the first matching device.
+      # Use a longer substring if more than one camera name contains "GelSight".
+      device_name: "GelSight"
+
+      # Rotate the published image 180° (for an inverted mount).
+      rotate_180: false
+
+      qos:
+        reliability: "reliable"   # "reliable" | "best_effort"
+        history:     "keep_last"  # "keep_last" | "keep_all"
+        depth:       10
+
+
+# ── Evetac (DV event camera) ──────────────────────────────────────────────────
+/**/evetac_node:
+  ros__parameters:
+
+    evetac:
+      # Time window over which events are accumulated into a single frame (ms).
+      # 5 ms is recommended by the Evetac paper.
+      accumulation_time_ms: 5.0
+
+      # Exponential decay time constant of the event accumulator (ms).
+      decay_tau_ms: 15.0
+
+      # Camera polling / publishing frequency (Hz).
+      publish_rate_hz: 200.0
+
+      # Resolution of the published image after resize.
+      output_width:  320
+      output_height: 240
+
+      # Event accumulator potentials.
+      neutral_potential:  0.5
+      event_contribution: 0.2
+      min_potential:      0.0
+      max_potential:      1.0
+
+      # ROS 2 topic (relative — published under the /mitas_sensors namespace).
+      topic: "evetac/image"
+
+      # TF frame id stamped on each message.
+      frame_id: "evetac"
+
+      qos:
+        reliability: "reliable"   # "reliable" | "best_effort"
+        history:     "keep_last"  # "keep_last" | "keep_all"
+        depth:       10
+
+
+# ── RealSense wrist camera ────────────────────────────────────────────────────
+/**/realsense_node:
+  ros__parameters:
+
+    realsense:
+      # Device serial from `rs-enumerate-devices`. Required.
+      # Leave empty to print the detected serials and exit.
+      serial_number: ""
+
+      # Capture resolution (width x height, pixels) and rate.
+      capture_width:  640
+      capture_height: 480
+      publish_rate_hz: 30.0
+
+      # Published resolution. The node resizes when this differs from the
+      # capture size and scales CameraInfo by the same factors.
+      output_width:  320
+      output_height: 240
+
+      # ROS 2 topic (relative — published under the /mitas_sensors namespace).
+      topic: "realsense/image"
+
+      # TF frame id stamped on each message.
+      frame_id: "realsense"
+
+      # Best effort avoids a backlog of stale wrist-camera frames.
+      qos:
+        reliability: "best_effort"  # "reliable" | "best_effort"
+        history:     "keep_last"    # "keep_last" | "keep_all"
+        depth:       5
